@@ -60,4 +60,5 @@ target/
 # Volume data
 volume/*
 
+.idea/*
 
