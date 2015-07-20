@@ -6,6 +6,7 @@ from PyQt4 import QtCore, QtGui, uic
 
 class GlyphViewerApp(QtGui.QMainWindow):
     def __init__(self, data_dir):
+
         #Parent constructor
         super(GlyphViewerApp,self).__init__()
         self.vtk_widget = None
@@ -21,6 +22,8 @@ class GlyphViewerApp(QtGui.QMainWindow):
         self.ui.vtk_layout.addWidget(self.vtk_widget)
         self.ui.vtk_layout.setContentsMargins(0,0,0,0)
         self.ui.vtk_panel.setLayout(self.ui.vtk_layout)
+        self.ui.threshold_slider.setValue(50)
+        self.ui.threshold_slider.valueChanged.connect(self.vtk_widget.set_threshold)
 
     def initialize(self):
         self.vtk_widget.start()
@@ -118,10 +121,17 @@ class QGlyphViewer(QtGui.QFrame):
         self.renderer = renderer
         self.interactor = interactor
         self.threshold = threshold
+        self.render_window = render_window
 
     def start(self):
         self.interactor.Initialize()
         self.interactor.Start()
+
+    def set_threshold(self, new_value):
+        float_value = new_value/100.0
+        print float_value
+        self.threshold.ThresholdByUpper(float_value)
+        self.render_window.Render()
 
 if __name__ == "__main__":
 
