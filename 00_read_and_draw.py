@@ -37,22 +37,29 @@ outline_actor.GetProperty().SetColor(1,1,1)
 renderer.AddActor(outline_actor)
 renderer.ResetCamera()
 
+
+# Threshold points
+threshold = vtk.vtkThresholdPoints()
+threshold.SetInputData(b0)
+threshold.ThresholdByUpper(0.5)
+
 # Draw arrows
 arrow = vtk.vtkArrowSource()
 glyphs = vtk.vtkGlyph3D()
 glyphs.SetInputData(b0)
 glyphs.SetSourceConnection(arrow.GetOutputPort())
-
-glyph_mapper =  vtk.vtkPolyDataMapper()
-glyph_mapper.SetInputConnection(glyphs.GetOutputPort())
-glyph_actor = vtk.vtkActor()
-glyph_actor.SetMapper(glyph_mapper)
+glyphs.SetInputConnection(threshold.GetOutputPort())
 
 glyphs.SetVectorModeToUseVector()
 glyphs.SetScaleModeToScaleByVector()
 glyphs.SetScaleFactor(0.005)
 glyphs.SetColorModeToColorByVector()
 
+# Mapper
+glyph_mapper =  vtk.vtkPolyDataMapper()
+glyph_mapper.SetInputConnection(glyphs.GetOutputPort())
+glyph_actor = vtk.vtkActor()
+glyph_actor.SetMapper(glyph_mapper)
 
 glyph_mapper.UseLookupTableScalarRangeOn()
 renderer.AddActor(glyph_actor)
@@ -64,11 +71,5 @@ lut = vtk.vtkColorTransferFunction()
 lut.AddRGBPoint(s0, 1,0,0)
 lut.AddRGBPoint(sf, 0,1,0)
 glyph_mapper.SetLookupTable(lut)
-
-# Threshold arrows
-threshold = vtk.vtkThresholdPoints()
-threshold.SetInputData(b0)
-threshold.ThresholdByUpper(0.5)
-glyphs.SetInputConnection(threshold.GetOutputPort())
 
 interactor.Start()
