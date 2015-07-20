@@ -1,8 +1,41 @@
 import os
 import vtk
+from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from PyQt4 import QtCore, QtGui, uic
 
-class GlyphViewer:
+
+class GlyphViewerApp(QtGui.QMainWindow):
     def __init__(self, data_dir):
+        #Parent constructor
+        super(GlyphViewerApp,self).__init__()
+        self.vtk_widget = None
+        self.ui = None
+        self.setup(data_dir)
+
+    def setup(self, data_dir):
+        import glyph_ui
+        self.ui = glyph_ui.Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.vtk_widget = QGlyphViewer(self.ui.vtk_panel, data_dir)
+        self.ui.vtk_layout = QtGui.QHBoxLayout()
+        self.ui.vtk_layout.addWidget(self.vtk_widget)
+        self.ui.vtk_layout.setContentsMargins(0,0,0,0)
+        self.ui.vtk_panel.setLayout(self.ui.vtk_layout)
+
+    def initialize(self):
+        self.vtk_widget.start()
+
+class QGlyphViewer(QtGui.QFrame):
+    def __init__(self, parent, data_dir):
+        super(QGlyphViewer,self).__init__(parent)
+
+        # Make tha actual QtWidget a child so that it can be re parented
+        interactor = QVTKRenderWindowInteractor(self)
+        self.layout = QtGui.QHBoxLayout()
+        self.layout.addWidget(interactor)
+        self.layout.setContentsMargins(0,0,0,0)
+        self.setLayout(self.layout)
+
         # Read the data
         xyx_file = os.path.join(data_dir, "combxyz.bin")
         q_file = os.path.join(data_dir, "combq.bin")
@@ -18,13 +51,13 @@ class GlyphViewer:
 
         # Setup VTK environment
         renderer = vtk.vtkRenderer()
-        render_window = vtk.vtkRenderWindow()
+        render_window = interactor.GetRenderWindow()
         render_window.AddRenderer(renderer)
-        interactor = vtk.vtkRenderWindowInteractor()
+
         interactor.SetInteractorStyle(vtk.vtkInteractorStyleTrackballCamera())
         render_window.SetInteractor(interactor)
         renderer.SetBackground(0.2,0.2,0.2)
-        interactor.Initialize()
+
 
         # Draw Outline
         outline = vtk.vtkStructuredGridOutlineFilter()
@@ -88,10 +121,20 @@ class GlyphViewer:
         self.threshold = threshold
 
     def start(self):
+        self.interactor.Initialize()
         self.interactor.Start()
 
 if __name__ == "__main__":
+
     os.chdir(os.path.dirname(__file__))
-    glyph_viewer = GlyphViewer("volume")
-    glyph_viewer.start()
-    print glyph_viewer.b0
+
+    # Recompile ui
+    with open("glyph_view.ui") as ui_file:
+        with open("glyph_ui.py","w") as py_ui_file:
+            uic.compileUi(ui_file,py_ui_file)
+
+    app = QtGui.QApplication([])
+    main_window = GlyphViewerApp("volume")
+    main_window.show()
+    main_window.initialize()
+    app.exec_()
