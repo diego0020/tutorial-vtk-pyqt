@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import vtk
 
@@ -94,4 +95,4 @@ if __name__ == "__main__":
     os.chdir(os.path.dirname(__file__))
     glyph_viewer = GlyphViewer("volume")
     glyph_viewer.start()
-    print glyph_viewer.b0
+    print(glyph_viewer.b0)

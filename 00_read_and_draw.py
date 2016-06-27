@@ -1,6 +1,6 @@
+from __future__ import print_function
 import os
 import vtk
-
 
 # Read the data
 os.chdir(os.path.dirname(__file__))

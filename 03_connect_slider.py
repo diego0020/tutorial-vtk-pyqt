@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import vtk
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
@@ -129,7 +130,7 @@ class QGlyphViewer(QtGui.QFrame):
 
     def set_threshold(self, new_value):
         float_value = new_value/100.0
-        print float_value
+        print(float_value)
         self.threshold.ThresholdByUpper(float_value)
         self.render_window.Render()
 
